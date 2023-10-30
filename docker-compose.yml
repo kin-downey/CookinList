@@ -1,0 +1,32 @@
+version: '3'
+services:
+  app:
+    tty: true
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    volumes:
+      - ./app:/app
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    env_file:
+      - .env
+  
+  db:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+    ports:
+      - 3306:3306
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$MYSQL_ROOT_PASSWORD"]
+      interval: 30s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
